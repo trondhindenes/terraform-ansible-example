@@ -1,0 +1,28 @@
+---
+- name: doit
+  hosts: localhost
+  tasks:
+  - name: load global vars
+    include_vars:
+      file: global_vars.yml
+
+  - name: load env vars
+    include_vars:
+      file: "{{ env }}_vars.yml"
+
+  - name: Do terraform stuff
+    community.general.terraform:
+      project_path: 'tf/'
+      state: "{{ state }}"
+      force_init: true
+      workspace: "{{ env }}"
+      backend_config:
+        bucket: "hindenes-tfstate"
+        prefix: "{{ team_name }}/{{ app_name }}"
+      variables:
+        the_size: "{{ the_size }}"
+        google_project_name: "{{ google_project_name }}"
+
+  - name: print stuff
+    debug: 
+      msg: "TF_WORKSPACE={{ env }} terraform plan -var the_size={{ the_size }} -var google_project_name={{ google_project_name }}"
